@@ -17,6 +17,11 @@ def test_other():
     else:
         print("1 is false");
     
+
+    #while
+    #while True:
+    #    pass
+
     i = 5;
     while i:
         i -= 1;
@@ -27,6 +32,7 @@ def test_other():
     else:
         print ("i<=0 i:", i)
 
+    #for range
     for i in range(6, 9):#6 7 8 ,range(5) , range(10, 1, -1)
         print (i)
     else:
