@@ -44,7 +44,7 @@ class Date(object):
                 date = Date(day, month, year)
                 return date
         return None
-    #类似于c#中的属性,访问时不带括号
+    #类似于c#中的属性,访问时不带括号 但是只要get没有set就失去了 c#属性的优势
     @property
     def Day(self):
         return self.__day
