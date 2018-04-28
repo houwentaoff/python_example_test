@@ -3,6 +3,10 @@
 # for中的计算量达到30多万次 在640*480的情况下,每帧刷新速度太慢
 # 解决方法为全部放在矩阵中进行运算然后再每帧写入,所以说为啥图
 # 片处理特别耗时
+
+#1. 当前电脑的显示特性由fbset -i 可以查看，里面描述了RGBA的偏移
+#2. 经测试虚拟机的为BGRA 实体机为BGR 而opencv中为BGR为何为BGR不
+#RGB原因是效率问题，具体查询opencv相关文档
 import cv2
 import struct
 #from PIL import Image
