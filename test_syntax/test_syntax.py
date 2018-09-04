@@ -4,6 +4,7 @@ import keyword
 import time
 
 import re
+import struct
 #测试基本语法
 #用空方法模拟接口
 class File:
@@ -110,6 +111,24 @@ def test_other():
     for v in ["aabbcc", 6,2,3,4,5,6,"ccc"]:
         print (v);
 
+def test_struct():
+    a = 1
+    b = 2
+    s = struct.pack('!ii', a, b)
+    data = s + bytes('12345', encoding='utf-8')
+    payload = data
+    # send ...
+    #struct.calcsize用于计算格式字符串所对应的结果的长度，如：struct.calcsize('ii')，返回8
+    #first = struct.unpack("!i", payload[0:4]) #ok first->tuple
+    #(first) = struct.unpack("!i", payload[0:4])  #ok
+    (first,) = struct.unpack("!i", payload[0:4]) #ok
+    sec = struct.unpack("!i", payload[4:8])
+    d = payload[8:]
+    print ("len %d" % len(payload), "fir:", hex(first), " ","payload[0]:",hex(d[0]))
+    for c in d:
+        print (hex(c), end='')#输出不换行 chr() :ascii -> string ord: string->ascii
+        #print hex(ord(c),)  #python2 中用,表示不换行
+
 if __name__ == "__main__":
     #str
     s ='dsd"vvv"'
@@ -121,12 +140,12 @@ if __name__ == "__main__":
     #dict
     #键必须不可变，所以可以用数字，字符串或元组充当，而用列表就不行
     d = {'name':'joy', 55:[111,222]}
-    aaa(mylist);
-    print(mylist);
-
-    test_other();
-    test_keyword();
-    test_with();
+    aaa(mylist)
+    print(mylist)
+    test_struct()
+    test_other()
+    test_keyword()
+    test_with()
     time.sleep(0.2)
     test_class()
     #从键盘输入 阻塞
