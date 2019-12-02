@@ -28,7 +28,7 @@ for sheet in excel:
 # 增加8列
 lcell = []
 for i in range(1,8):
-    cell = openpyxl.worksheet.write_only.WriteOnlyCell(ws, value=str(i))
+    cell = openpyxl.worksheet._write_only.WriteOnlyCell(ws, value=str(i))
     lcell.append(cell)
 
 ws.append(lcell)
