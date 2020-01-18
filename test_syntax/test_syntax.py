@@ -18,7 +18,16 @@ class Date(object):
         self.__day = day
         self.month = month
         self.year = year
-    #2018-2-3 下面的classmethod很重要否则编译不过
+    #重载运算符
+    def __eq__(self, other):
+        return self.year == other.year
+
+    def __le__(self, other):
+        return self.year < other.year
+
+    def __gt__(self, other):
+        return self.year > other.year        
+    #2018-2-3 下面的classmethod很重要否则编译不过,class/static method都是类使用，不要用于对象
     '''
     @classmethod
     def Parse(cls, string):
@@ -32,16 +41,22 @@ class Date(object):
                 date = cls(day, month, year)
                 return date
         return None
-        '''
+     '''
     @staticmethod
     def Parse(string):
+    ''' 正则表达式分组获取数据，如下为获取1990-02-01这种年月日'''
+    '''pattern = re.compile(r'(cmd_mem)_(\d+)_(0[xX][0-9a-fA-F]+)\.txt')这句可以分组获取cmd_mem_123_0xff123.txt
+    m.group(1) m.group(2) m.group(3)
+       中的cmd_mem 123 0xff123
+       
+    '''
         pattern = re.compile(r'(\d+)-(\d+)-(\d+)')
         m = pattern.match(string)
         if m != None:
             year = m.group(1)
             month = m.group(2)
             day = m.group(3)
-            if (int(month) > 0 and int(month) < 13) and (int(day) > 0 and int(day) < 32):
+            if (int(month,10) > 0 and int(month) < 13) and (int(day) > 0 and int(day) < 32):
                 date = Date(day, month, year)
                 return date
         return None
@@ -54,7 +69,8 @@ class Date(object):
 
 def test_class():
     d = Date.Parse("2018-4-20")
-    if d != None:
+    #用is替换 == ; is比较的是对象引用, == 是比较值，若重载了==号就只能使用is
+    if d is not None:
         print("year:", d.year, "mon:", d.month, "day:", d.day)
     else:
         print("format error!")
@@ -110,12 +126,22 @@ def test_other():
 
     for v in ["aabbcc", 6,2,3,4,5,6,"ccc"]:
         print (v);
-
+def test_format():
+    print("%s,0x%8.8x, %d" % ('12fdsv', int('1234'), int('0x12345', 16)))
+    '''用struct.pack/unpack进行格式化'''
 def test_struct():
     a = 1
     b = 2
+    '''
+    s为bytes对象, bytes对象能直接写入文件,如outfd = os.open(sys.argv[2], os.O_RDWR|os.O_CREAT); 
+    os.write(outfd,s)
+    bytes是一个不可变的数据类型,如果要修改需使用切片操作
+    bytesarray可修改如a=bytesarray(10);a[8] = 0x2
+    '''
     s = struct.pack('!ii', a, b)
-    data = s + bytes('12345', encoding='utf-8')
+    # tmp为int
+    tmp = struct.unpack('<I', s[0:4])
+    data = s + bytes("12345%8.8x\n" % tmp,, encoding='utf-8')
     payload = data
     # send ...
     #struct.calcsize用于计算格式字符串所对应的结果的长度，如：struct.calcsize('ii')，返回8
