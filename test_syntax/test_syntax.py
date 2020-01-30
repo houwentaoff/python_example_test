@@ -14,11 +14,11 @@ class File:
         pass
 
 class Date(object):
-    def __init__(self, day=0, month=0, year=0):
+    def __init__(self, day=0, month=0, year=0):#self类的定义处必须添加，否则运行提示语法错误
         self.__day = day
         self.month = month
         self.year = year
-    #重载运算符
+    #重载运算符 ，进行重载以后就可使用list = [Date(),Date()) list.sort 进行排序
     def __eq__(self, other):
         return self.year == other.year
 
@@ -186,5 +186,5 @@ if __name__ == "__main__":
         f.read(3);
         f.close();
     except:
-        print("joy:Unexpected error:", sys.exc_info()[0]);
+        print("joy:Unexpected error:", sys.exc_info()[0], "0x%x 0x%x"%(int('0x123', 16), 0x124));
 
