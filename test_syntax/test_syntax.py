@@ -123,9 +123,14 @@ def test_other():
         print (i)
     else:
         print("no cell in range??");
-
+    # for list
     for v in ["aabbcc", 6,2,3,4,5,6,"ccc"]:
         print (v);
+    # zip 多个迭代参数
+    lowf = open(sys.argv[1])
+    highf = open(sys.argv[2])
+    for (line0, line1) in zip(lowf, highf):
+        print(line0, line1)
 def test_format():
     print("%s,0x%8.8x, %d" % ('12fdsv', int('1234'), int('0x12345', 16)))
     '''用struct.pack/unpack进行格式化'''
