@@ -169,7 +169,8 @@ if __name__ == "__main__":
     #tuple 空元组 tup=()
     tup = ('1233', [1,2,3], 8)
     #dict
-    #键必须不可变，所以可以用数字，字符串或元组充当，而用列表就不行
+    #键必须不可变，所以可以用数字，字符串或元组充当，而用列表就不行,value也可以是函数如
+    dic={"aa":test_struct}
     d = {'name':'joy', 55:[111,222]}
     aaa(mylist)
     print(mylist)
