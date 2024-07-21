@@ -18,4 +18,6 @@ from Cryptome.Publickey import RSA
 1. 在`https://www.lfd.uci.edu/~gohlke/pythonlibs/` 中找到对应的`whl文件`下载
 2. `pip3 install *.whl` 安装第三方包.
 ### setup.py安装 
+**设置PYTHONPATH**
+`export PYTHONPATH="/home/share/python/lib/python3.6/site-packages:$PYTHONPATH"`
 1. 源码安装到指定目录`python3 setup.py install --prefix=/home/share/python/lib/`
