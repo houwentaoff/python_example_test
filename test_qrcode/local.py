@@ -4,6 +4,8 @@ from PIL import Image
 import struct
 import base64
 import cv2
+import os
+import zlib
 from PIL import Image
 begin_fmt = struct.Struct(
     'I20sI'
@@ -36,6 +38,7 @@ size = 0
 offset = 0
 le=0
 outfd=0
+global_frame = -1
 # 创建mss屏幕截图对象
 with mss.mss() as sct:
     # 列出所有显示器的截图
@@ -60,28 +63,49 @@ with mss.mss() as sct:
                 if x == 0x12345678: #begin frame
                     frame_id = y
                     file_name = binary_data[8:28].decode()
-                    size = struct.unpack('<I', binary_data[28:32])[0]
-                    #outfd = os.open(file_name+"back", os.O_RDWR| os.O_BINARY | os.O_CREAT);
+                    size,curcrc = struct.unpack('<II', binary_data[28:36])
+                    crc = zlib.crc32(binary_data[0:32])
+                    if (crc != curcrc):
+                        print('crc err: crc:', hex(curcrc), ' expect:', hex(crc))
+                    else:                        
+                        if global_frame == frame_id:
+                            continue
+                        outfd = os.open(file_name+"back", os.O_RDWR| os.O_BINARY | os.O_CREAT);
+                        global_frame = frame_id                                               
                     print('begin frame file:', file_name, ' size:', size)
                 elif x == 0x87654321: #end frame
                     frame_id = y
                     md5 = binary_data[8:24].decode()
-                    total = struct.unpack('<I', binary_data[24:28])[0]
-                    os.close(outfd) 
+                    total,curcrc = struct.unpack('<II', binary_data[24:32])
+                    crc = zlib.crc32(binary_data[0:28])
+                    if (crc != curcrc):
+                        print('crc err: crc:', hex(curcrc), ' expect:', hex(crc))
+                    else:                        
+                        if global_frame == frame_id:
+                            continue
+                        os.close(outfd) 
+                        global_frame = frame_id                                            
                     print('end frame, id:', frame_id, ' md5:', md5, ' already send:', total)
                 else :#data frame
                     frame_id = x
                     offset = y
                     le = struct.unpack('<I', binary_data[8:12])[0]
-                    data = binary_data[12:]
+                    data = binary_data[12:12+le]
+                    curcrc = struct.unpack('<I', binary_data[12+le:])[0]
                     if le != len(data):
                         print('frame err len:', le, ' act:', len(data))
                     #write 2 file
-                    os.write(outfd, data)
+                    crc = zlib.crc32(binary_data[0:12+le])
+                    if (crc != curcrc):
+                        print('crc err: crc:', hex(curcrc), ' expect:', hex(crc))
+                    else:                        
+                        if global_frame == frame_id:
+                            continue
+                        os.write(outfd, data)
+                        global_frame = frame_id
                     print('data frame id:', frame_id, ' offset:', offset, 'len:', le)
                     
                 print ('offset:', hex(offset), ' size:', le,' ', len(binary_data))
-                data =  binary_data[8:]
                 cv2.waitKey(300) 
             #print ('offset:', offset, ' le:', le, 'data:', data.hex())
 

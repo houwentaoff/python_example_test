@@ -6,6 +6,7 @@ import base64
 import time
 import cv2
 import hashlib
+import zlib
 # 定义 uImage 头部结构
 begin_fmt = struct.Struct(
     'I20sI'
@@ -21,18 +22,21 @@ begin_frame = {
 'id':0,#frame num
 'file':'aaa.tar.gz', #20B
 'size': 0, #文件总大小
+'crc32':0
 } 
 data_frame = {
 'id':0,#frame num
 'offset': 0,# 文件中的偏移
 'len': 0, #该包数据帧的长度
 'data': 0,  #二进制数据
+'crc32':0
 }
 end_frame = {
 'magic': 0, # 0x87654321
 'id':0,#frame num
 'md5': 0,  #md5 16B
 'total': 0, #总发送长度
+'crc32':0
 }
 def calculate_file_md5(file_path):
     md5 = hashlib.md5()
@@ -50,6 +54,7 @@ def gen_beginfame(frame_id, filename, size):
     data = struct.pack("<II", 0x12345678, frame_id)
     data += filename.encode()[0:20]
     data += struct.pack("<I", size)
+    data += zlib.crc32(data).to_bytes(4, 'little')
     base64_encoded = base64.b64encode(data)
     qr = qrcode.QRCode(
         version=15,
@@ -65,6 +70,8 @@ def gen_beginfame(frame_id, filename, size):
 def gen_endfame(frame_id, md5, total):
     data = struct.pack("<II", 0x87654321, frame_id)
     data += md5.encode()[0:16]
+    data += total.to_bytes(4, 'little')
+    data += zlib.crc32(data).to_bytes(4, 'little')
     base64_encoded = base64.b64encode(data)
     qr = qrcode.QRCode(
         version=15,
@@ -80,6 +87,10 @@ def gen_endfame(frame_id, md5, total):
 def gen_datafame(frame_id, offset, data, size):
     msg = struct.pack("<III", frame_id, offset, size)
     msg += data
+    crc = zlib.crc32(msg).to_bytes(4, 'little')
+    a = struct.unpack('<I', crc)[0]
+    print(hex(a))
+    msg += zlib.crc32(msg).to_bytes(4, 'little')
     base64_encoded = base64.b64encode(msg)
     qr = qrcode.QRCode(
         version=15,
