@@ -1,5 +1,5 @@
 import mss
-from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import decode, ZBarSymbol
 from PIL import Image
 import struct
 import base64
@@ -34,6 +34,8 @@ md5=''
 frame_id = 0
 size = 0
 offset = 0
+le=0
+outfd=0
 # 创建mss屏幕截图对象
 with mss.mss() as sct:
     # 列出所有显示器的截图
@@ -45,7 +47,7 @@ with mss.mss() as sct:
         
         img = Image.frombytes('RGB', screenshot.size, screenshot.bgra, 'raw', 'BGRX')
         # 使用pyzbar解码图像中的二维码
-        decoded_objects = decode(img)
+        decoded_objects = decode(img, symbols=[ZBarSymbol.QRCODE])
         if decoded_objects != None:     
             # 遍历解码对象
             for obj in decoded_objects:
@@ -58,12 +60,14 @@ with mss.mss() as sct:
                 if x == 0x12345678: #begin frame
                     frame_id = y
                     file_name = binary_data[8:28].decode()
-                    size = struct.unpack('<I', binary_data[28:32])
+                    size = struct.unpack('<I', binary_data[28:32])[0]
+                    #outfd = os.open(file_name+"back", os.O_RDWR| os.O_BINARY | os.O_CREAT);
                     print('begin frame file:', file_name, ' size:', size)
                 elif x == 0x87654321: #end frame
                     frame_id = y
                     md5 = binary_data[8:24].decode()
                     total = struct.unpack('<I', binary_data[24:28])[0]
+                    os.close(outfd) 
                     print('end frame, id:', frame_id, ' md5:', md5, ' already send:', total)
                 else :#data frame
                     frame_id = x
@@ -73,6 +77,7 @@ with mss.mss() as sct:
                     if le != len(data):
                         print('frame err len:', le, ' act:', len(data))
                     #write 2 file
+                    os.write(outfd, data)
                     print('data frame id:', frame_id, ' offset:', offset, 'len:', le)
                     
                 print ('offset:', hex(offset), ' size:', le,' ', len(binary_data))
