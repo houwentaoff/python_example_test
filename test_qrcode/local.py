@@ -7,6 +7,11 @@ import cv2
 import os
 import zlib
 from PIL import Image
+import hashlib
+def xmd5(fname):
+    with open(fname, 'rb') as f:
+        md5 = hashlib.md5(f.read()).hexdigest()
+    print(fname, ":md5:", md5)
 begin_fmt = struct.Struct(
     'I20sI'
 )
@@ -65,7 +70,7 @@ with mss.mss() as sct:
                     file_name = binary_data[8:28].decode()
                     size,curcrc = struct.unpack('<II', binary_data[28:36])
                     crc = zlib.crc32(binary_data[0:32])
-                    if (crc != curcrc):
+                    if crc != curcrc:
                         print('crc err: crc:', hex(curcrc), ' expect:', hex(crc))
                     else:                        
                         if global_frame == frame_id:
@@ -78,7 +83,7 @@ with mss.mss() as sct:
                     md5 = binary_data[8:24].decode()
                     total,curcrc = struct.unpack('<II', binary_data[24:32])
                     crc = zlib.crc32(binary_data[0:28])
-                    if (crc != curcrc):
+                    if crc != curcrc:
                         print('crc err: crc:', hex(curcrc), ' expect:', hex(crc))
                     else:                        
                         if global_frame == frame_id:
@@ -86,6 +91,8 @@ with mss.mss() as sct:
                         os.close(outfd) 
                         global_frame = frame_id                                            
                     print('end frame, id:', frame_id, ' md5:', md5, ' already send:', total)
+                    xmd5(file_name+"back")
+                    exit()
                 else :#data frame
                     frame_id = x
                     offset = y
@@ -96,7 +103,7 @@ with mss.mss() as sct:
                         print('frame err len:', le, ' act:', len(data))
                     #write 2 file
                     crc = zlib.crc32(binary_data[0:12+le])
-                    if (crc != curcrc):
+                    if crc != curcrc:
                         print('crc err: crc:', hex(curcrc), ' expect:', hex(crc))
                     else:                        
                         if global_frame == frame_id:

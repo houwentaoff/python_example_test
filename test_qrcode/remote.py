@@ -132,5 +132,6 @@ while True:
         break;
 frame_id += 1        
 img = gen_endfame(frame_id, md5, offset)
-display_frame(img)        
+display_frame(img) 
+cv2.waitKey(1000)       
 os.close(infd)
