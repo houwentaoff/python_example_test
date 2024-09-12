@@ -126,8 +126,8 @@ while True:
     if size != block:
         over=True
     frame_id += 1
-    if frame_id != 215:
-        continue
+    #if frame_id != 215:
+        #continue
     img = gen_datafame(frame_id, offset, buf, size)
     display_frame(img)
 
