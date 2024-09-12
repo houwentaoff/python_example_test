@@ -48,7 +48,7 @@ def display_frame(img):
     img = img.convert('RGB')
     img_np = np.array(img)
     cv2.imshow('bigbang', img_np)
-    cv2.waitKey(1000)
+    cv2.waitKey(500)
     
 def gen_beginfame(frame_id, filename, size):
     data = struct.pack("<II", 0x12345678, frame_id)
@@ -57,7 +57,7 @@ def gen_beginfame(frame_id, filename, size):
     data += zlib.crc32(data).to_bytes(4, 'little')
     base64_encoded = base64.b64encode(data)
     qr = qrcode.QRCode(
-        version=15,
+        version=4,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
@@ -93,10 +93,10 @@ def gen_datafame(frame_id, offset, data, size):
     msg += zlib.crc32(msg).to_bytes(4, 'little')
     base64_encoded = base64.b64encode(msg)
     qr = qrcode.QRCode(
-        version=15,
+        version=40,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
+        box_size=4,
+        border=2,
     )
     qr.add_data(base64_encoded)
     qr.make(fit=True)
@@ -113,10 +113,12 @@ print('file size:', file_size, ' md5:', md5)
 frame_id = 0
 img = gen_beginfame(frame_id, sys.argv[1], file_size)
 display_frame(img)
+cv2.waitKey(1000)
 over = False
 offset = 0
-block=1024   
- 
+block=2048   
+lossframe=[215,] 
+lossid=0
 while True:
     buf = os.read(infd, block)
     #print(len(buf))
@@ -124,6 +126,8 @@ while True:
     if size != block:
         over=True
     frame_id += 1
+    if frame_id != 215:
+        continue
     img = gen_datafame(frame_id, offset, buf, size)
     display_frame(img)
 

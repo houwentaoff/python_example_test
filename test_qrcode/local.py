@@ -44,6 +44,7 @@ offset = 0
 le=0
 outfd=0
 global_frame = -1
+last_frame = -1
 # 创建mss屏幕截图对象
 with mss.mss() as sct:
     # 列出所有显示器的截图
@@ -108,11 +109,14 @@ with mss.mss() as sct:
                     else:                        
                         if global_frame == frame_id:
                             continue
-                        os.write(outfd, data)
+                        os.write(outfd, data)                        
+                        last_frame = global_frame
                         global_frame = frame_id
+                        if global_frame - last_frame > 2:
+                            print('loss frame! last frame:', last_frame, ' cur frame:', frame_id)
                     print('data frame id:', frame_id, ' offset:', offset, 'len:', le)
                     
                 print ('offset:', hex(offset), ' size:', le,' ', len(binary_data))
-                cv2.waitKey(300) 
+                cv2.waitKey(100) 
             #print ('offset:', offset, ' le:', le, 'data:', data.hex())
 
