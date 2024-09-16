@@ -8,6 +8,7 @@ import os
 import zlib
 from PIL import Image
 import hashlib
+import sys
 def xmd5(fname):
     with open(fname, 'rb') as f:
         md5 = hashlib.md5(f.read()).hexdigest()
@@ -45,6 +46,12 @@ le=0
 outfd=0
 global_frame = -1
 last_frame = -1
+xxxmode = 0
+if len(sys.argv) == 2:
+    xxxmode = int(sys.argv[1], 10)
+fillmode=False
+if xxxmode == 1:
+   fillmode=True 
 # 创建mss屏幕截图对象
 with mss.mss() as sct:
     # 列出所有显示器的截图
@@ -76,7 +83,10 @@ with mss.mss() as sct:
                     else:                        
                         if global_frame == frame_id:
                             continue
-                        outfd = os.open(file_name+"back", os.O_RDWR| os.O_BINARY | os.O_CREAT);
+                        if fillmode:
+                            outfd = os.open(file_name+"back", os.O_RDWR| os.O_BINARY );
+                        else:
+                            outfd = os.open(file_name+"back", os.O_RDWR| os.O_BINARY | os.O_CREAT);
                         global_frame = frame_id                                               
                     print('begin frame file:', file_name, ' size:', size)
                 elif x == 0x87654321: #end frame
@@ -109,14 +119,16 @@ with mss.mss() as sct:
                     else:                        
                         if global_frame == frame_id:
                             continue
+                        os.lseek(outfd, offset, 0)
                         os.write(outfd, data)                        
                         last_frame = global_frame
                         global_frame = frame_id
-                        if global_frame - last_frame > 2:
-                            print('loss frame! last frame:', last_frame, ' cur frame:', frame_id)
+                        if global_frame - last_frame >= 2:
+                            if fillmode == False:
+                                print('loss frame! last frame:', last_frame, ' cur frame:', frame_id)
                     print('data frame id:', frame_id, ' offset:', offset, 'len:', le)
                     
                 print ('offset:', hex(offset), ' size:', le,' ', len(binary_data))
-                cv2.waitKey(100) 
+                #cv2.waitKey(0) 
             #print ('offset:', offset, ' le:', le, 'data:', data.hex())
 
