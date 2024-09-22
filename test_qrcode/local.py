@@ -9,6 +9,8 @@ import zlib
 from PIL import Image
 import hashlib
 import sys
+def xor_decrypt(data, key):
+    return bytes([byte ^ key for byte in data])
 def xmd5(fname):
     with open(fname, 'rb') as f:
         md5 = hashlib.md5(f.read()).hexdigest()
@@ -120,6 +122,7 @@ with mss.mss() as sct:
                         if global_frame == frame_id:
                             continue
                         os.lseek(outfd, offset, 0)
+                        data=xor_decrypt(data, frame_id&0xff)
                         os.write(outfd, data)                        
                         last_frame = global_frame
                         global_frame = frame_id

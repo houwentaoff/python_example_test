@@ -38,6 +38,10 @@ end_frame = {
 'total': 0, #总发送长度
 'crc32':0
 }
+
+def xor_encrypt(data, key):
+    return bytes([byte ^ key for byte in data]) 
+
 def calculate_file_md5(file_path):
     md5 = hashlib.md5()
     with open(file_path, 'rb') as f:
@@ -88,6 +92,7 @@ def gen_endfame(frame_id, md5, total):
     return img
 def gen_datafame(frame_id, offset, data, size):
     msg = struct.pack("<III", frame_id, offset, size)
+    data=xor_encrypt(data, frame_id&0xff)
     msg += data
     crc = zlib.crc32(msg).to_bytes(4, 'little')
     a = struct.unpack('<I', crc)[0]
