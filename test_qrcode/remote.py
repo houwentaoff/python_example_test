@@ -145,6 +145,9 @@ while True:
         if frame_id in lossframes:            
             img = gen_datafame(frame_id, offset, buf, size)
             display_frame(img)
+        if frame_id in lossframes:            
+            img = gen_datafame(frame_id, offset, buf, size)
+            display_frame(img)
     else:
         img = gen_datafame(frame_id, offset, buf, size)
         display_frame(img)

@@ -49,9 +49,11 @@ outfd=0
 global_frame = -1
 last_frame = -1
 xxxmode = 0
+lossframes=[]
 if len(sys.argv) == 2:
     xxxmode = int(sys.argv[1], 10)
 fillmode=False
+
 if xxxmode == 1:
    fillmode=True 
 # 创建mss屏幕截图对象
@@ -105,6 +107,8 @@ with mss.mss() as sct:
                         global_frame = frame_id                                            
                     print('end frame, id:', frame_id, ' md5:', md5, ' already send:', total)
                     xmd5(file_name+"back")
+                    if fillmode == False:
+                        print('lost frames:', lossframes)
                     exit()
                 else :#data frame
                     frame_id = x
@@ -129,6 +133,8 @@ with mss.mss() as sct:
                         if global_frame - last_frame >= 2:
                             if fillmode == False:
                                 print('loss frame! last frame:', last_frame, ' cur frame:', frame_id)
+                                for lossfs in range(last_frame+1, global_frame):
+                                    lossframes.append(lossfs)
                     print('data frame id:', frame_id, ' offset:', offset, 'len:', le)
                     
                 print ('offset:', hex(offset), ' size:', le,' ', len(binary_data))
